@@ -19,7 +19,10 @@ st.set_page_config(page_title="GPT AI 全功能極速助手", layout="wide", pag
 st.markdown("<h1 style='text-align: center; color: #2C3E50;'>⚡ GPT AI 全功能極速助手</h1>", unsafe_allow_html=True)
 
 # ✅ OpenAI API KEY（安全建議：實務部署請用 st.secrets 或 os.environ）
-api_key = "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"
+import os
+from dotenv import load_dotenv
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key)
 
 # ✅ 特休資訊
