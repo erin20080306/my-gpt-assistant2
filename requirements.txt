@@ -8,4 +8,4 @@ seaborn
 fpdf
 python-docx
 openpyxl
-pip install gTTS
+gTTS
