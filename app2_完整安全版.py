@@ -15,13 +15,12 @@ import seaborn as sns
 import re
 import os
 from dotenv import load_dotenv
-from gtts import gTTS  # 語音合成
 
 # ✅ 頁面設定
 st.set_page_config(page_title="GPT AI 全功能極速助手", layout="wide", page_icon="⚡")
 st.markdown("<h1 style='text-align: center; color: #2C3E50;'>⚡ GPT AI 全功能極速助手</h1>", unsafe_allow_html=True)
 
-# ✅ OpenAI API KEY
+# ✅ OpenAI API
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key)
@@ -29,30 +28,29 @@ client = OpenAI(api_key=api_key)
 # ✅ 特休資訊
 annual_leave_info = "📅 特休依《勞基法》第38條：滿6個月3天、滿1年7天、滿2年10天…最高30天"
 
-# ✅ 功能提示詞（新增翻譯與語音/Ptt文案）
+# ✅ 功能提示詞
 prompt_map = {
     "履歷表產生": "請幫我根據以下資訊，產生一份正式中文履歷表：",
     "專案計畫書": "請撰寫一份完整的專案計畫書，內容包含目的、目標、執行步驟、時間表與預期成果：",
     "合約草稿": "請撰寫以下需求對應的合約草稿：",
     "出勤紀錄表": "請幫我建立一份包含員工出勤紀錄的表格格式：",
     "資料分析報表": "請根據以下資料建立摘要、趨勢與建議：",
-    "函式 (google sheet+excel函數公式)": "請列出所有適用於 Google Sheets 與 Excel 的常用函數，並提供簡要範例與用途。",
+    "函式 (google sheet+excel函數公式)": "請列出所有適用於 Google Sheets 與 Excel 的常用函數，並提供簡要範例與用途（排除特休計算相關公式）。",
     "函式+解說 (google sheet+excel函數公式)": "請列出所有適用於 Google Sheets 與 Excel 的實用函數，並提供範例與說明其用途。",
-    "教學生成(google sheet+excel函數公式)": "請針對所有適用函數提供簡短教學與實例。",
+    "教學生成(google sheet+excel函數公式)": "請針對所有適用的常用函數提供教學與實例。",
     "法律諮詢": "請針對以下法律問題提供意見，並標註法規依據：",
     "特休公式選項": annual_leave_info + "\n請產生 Google Sheets / Excel 特休計算公式",
     "特休公式+解說選項": annual_leave_info + "\n請產生公式並說明用途與欄位設定",
     "特休教學生成選項": annual_leave_info + "\n請產生教學與使用流程，並提供公式",
     "寫 Python 程式": "請**只用 Python**寫以下需求的程式，並簡要說明教學。",
     "寫 Apps Script 程式": "請**只用 Google Apps Script**寫以下需求的程式，並簡要說明教學。",
-    "翻譯成英文": "請將以下內容翻譯成英文：",
-    "翻譯成韓文": "請將以下內容翻譯成韓文：",
-    "翻譯成日文": "請將以下內容翻譯成日文：",
-    "翻譯成法文": "請將以下內容翻譯成法文：",
-    "產生英文報告": "請幫我用正式英文撰寫以下主題的報告：",
-    "產生韓文報告": "請幫我用正式韓文撰寫以下主題的報告：",
-    "產生日文報告": "請幫我用正式日文撰寫以下主題的報告：",
-    "自動生成Ptt文案": "請幫我產生一篇符合 PTT Style 的文章，語氣自然，內文生動，主題如下："
+    
+    # ✅ 新增功能
+    "翻譯選項/英文/韓文/日文/法文/": "請將以下文字翻譯為英文、韓文、日文與法文：",
+    "產生英文報告": "請根據以下資料撰寫一份正式英文報告：",
+    "產生韓文報告": "請根據以下資料撰寫一份正式韓文報告：",
+    "產生日文報告": "請根據以下資料撰寫一份正式日文報告：",
+    "自動生成Ptt文案": "請幫我根據以下主題，自動生成一篇風格類似 Ptt 鄉民的推文文案："
 }
 
 def clean_response(text):
@@ -152,15 +150,6 @@ if st.button("⚡ 開始即時產生"):
                 f"<pre style='white-space: pre-wrap;'>{result}</pre></div>",
                 unsafe_allow_html=True
             )
-
-            # 語音朗讀（中文/英文/日文/韓文）
-            if feature.startswith("翻譯成") or "報告" in feature or "文案" in feature:
-                tts = gTTS(text=result, lang="zh" if "中文" in result else "en")
-                audio_buffer = BytesIO()
-                tts.write_to_fp(audio_buffer)
-                audio_buffer.seek(0)
-                st.audio(audio_buffer.read(), format="audio/mp3")
-
             if feature in ["履歷表產生", "專案計畫書", "合約草稿"]:
                 st.download_button("📄 下載 Word", save_as_word(result), file_name="輸出.docx")
                 st.download_button("🧾 下載 PDF", save_as_pdf(result), file_name="輸出.pdf")
