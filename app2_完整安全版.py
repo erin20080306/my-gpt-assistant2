@@ -125,6 +125,9 @@ st.header("🧠 GPT 極速生成功能")
 if 'user_input' not in st.session_state:
     st.session_state.user_input = ""
 
+if 'result' not in st.session_state:
+    st.session_state.result = None
+
 def update_user_input():
     st.session_state.user_input = ""
 
@@ -145,29 +148,36 @@ if st.button("⚡ 開始即時產生"):
                 temperature=0.5
             )
             result = response.choices[0].message.content
-            st.markdown(
-                f"<div style='background-color:#F4F6F6;padding:10px;border-radius:5px;'>"
-                f"<pre style='white-space: pre-wrap;'>{result}</pre></div>",
-                unsafe_allow_html=True
-            )
+            st.session_state.result = result  # ⭐ 保存在 session
+            st.rerun()  # 🔁 重新載入頁面以顯示播放按鈕
 
-            # 🔊 播放語音按鈕區塊
-            lang_map = {
-                "產生英文報告": "en",
-                "產生韓文報告": "ko",
-                "產生日文報告": "ja",
-                "翻譯選項/英文/韓文/日文/法文/": "zh",
-            }
-            lang = lang_map.get(feature, "zh")
-            if st.button("🔊 播放語音"):
-                tts = gTTS(text=result, lang=lang)
-                with NamedTemporaryFile(delete=False, suffix=".mp3") as tmpfile:
-                    tts.save(tmpfile.name)
-                    st.audio(tmpfile.name, format="audio/mp3")
+# ✅ 顯示結果與播放語音（不會因為按鈕被清除）
+if st.session_state.result:
+    st.markdown(
+        f"<div style='background-color:#F4F6F6;padding:10px;border-radius:5px;'>"
+        f"<pre style='white-space: pre-wrap;'>{st.session_state.result}</pre></div>",
+        unsafe_allow_html=True
+    )
 
-            # 檔案下載
-            if feature in ["履歷表產生", "專案計畫書", "合約草稿"]:
-                st.download_button("📄 下載 Word", save_as_word(result), file_name="輸出.docx")
-                st.download_button("🧾 下載 PDF", save_as_pdf(result), file_name="輸出.pdf")
-            elif feature in ["出勤紀錄表", "資料分析報表"]:
-                st.download_button("📊 下載 Excel", save_as_excel(result), file_name="輸出.xlsx")
+    # 🔊 語音語言下拉選單
+    lang_options = {
+        "中文": "zh",
+        "英文": "en",
+        "日文": "ja",
+        "韓文": "ko"
+    }
+    lang_name = st.selectbox("選擇語音朗讀語言", list(lang_options.keys()), index=0)
+    lang = lang_options[lang_name]
+
+    if st.button("🔊 播放語音"):
+        tts = gTTS(text=st.session_state.result, lang=lang)
+        with NamedTemporaryFile(delete=False, suffix=".mp3") as tmpfile:
+            tts.save(tmpfile.name)
+            st.audio(tmpfile.name, format="audio/mp3")
+
+    # 📄 檔案下載
+    if feature in ["履歷表產生", "專案計畫書", "合約草稿"]:
+        st.download_button("📄 下載 Word", save_as_word(st.session_state.result), file_name="輸出.docx")
+        st.download_button("🧾 下載 PDF", save_as_pdf(st.session_state.result), file_name="輸出.pdf")
+    elif feature in ["出勤紀錄表", "資料分析報表"]:
+        st.download_button("📊 下載 Excel", save_as_excel(st.session_state.result), file_name="輸出.xlsx")
