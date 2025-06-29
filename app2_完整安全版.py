@@ -15,6 +15,8 @@ import seaborn as sns
 import re
 import os
 from dotenv import load_dotenv
+from gtts import gTTS
+from tempfile import NamedTemporaryFile
 
 # ✅ 頁面設定
 st.set_page_config(page_title="GPT AI 全功能極速助手", layout="wide", page_icon="⚡")
@@ -44,8 +46,6 @@ prompt_map = {
     "特休教學生成選項": annual_leave_info + "\n請產生教學與使用流程，並提供公式",
     "寫 Python 程式": "請**只用 Python**寫以下需求的程式，並簡要說明教學。",
     "寫 Apps Script 程式": "請**只用 Google Apps Script**寫以下需求的程式，並簡要說明教學。",
-    
-    # ✅ 新增功能
     "翻譯選項/英文/韓文/日文/法文/": "請將以下文字翻譯為英文、韓文、日文與法文：",
     "產生英文報告": "請根據以下資料撰寫一份正式英文報告：",
     "產生韓文報告": "請根據以下資料撰寫一份正式韓文報告：",
@@ -150,6 +150,22 @@ if st.button("⚡ 開始即時產生"):
                 f"<pre style='white-space: pre-wrap;'>{result}</pre></div>",
                 unsafe_allow_html=True
             )
+
+            # 🔊 播放語音按鈕區塊
+            lang_map = {
+                "產生英文報告": "en",
+                "產生韓文報告": "ko",
+                "產生日文報告": "ja",
+                "翻譯選項/英文/韓文/日文/法文/": "zh",
+            }
+            lang = lang_map.get(feature, "zh")
+            if st.button("🔊 播放語音"):
+                tts = gTTS(text=result, lang=lang)
+                with NamedTemporaryFile(delete=False, suffix=".mp3") as tmpfile:
+                    tts.save(tmpfile.name)
+                    st.audio(tmpfile.name, format="audio/mp3")
+
+            # 檔案下載
             if feature in ["履歷表產生", "專案計畫書", "合約草稿"]:
                 st.download_button("📄 下載 Word", save_as_word(result), file_name="輸出.docx")
                 st.download_button("🧾 下載 PDF", save_as_pdf(result), file_name="輸出.pdf")
