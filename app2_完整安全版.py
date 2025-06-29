@@ -15,7 +15,6 @@ import seaborn as sns
 import re
 import os
 from dotenv import load_dotenv
-from gtts import gTTS
 from tempfile import NamedTemporaryFile
 
 # ✅ 頁面設定
@@ -148,8 +147,8 @@ if st.button("⚡ 開始即時產生"):
                 temperature=0.5
             )
             result = response.choices[0].message.content
-            st.session_state.result = result  # ⭐ 保存在 session
-            st.rerun()  # 🔁 重新載入頁面以顯示播放按鈕
+            st.session_state.result = result
+            st.rerun()
 
 # ✅ 顯示結果與播放語音（不會因為按鈕被清除）
 if st.session_state.result:
@@ -170,9 +169,15 @@ if st.session_state.result:
     lang = lang_options[lang_name]
 
     if st.button("🔊 播放語音"):
-        tts = gTTS(text=st.session_state.result, lang=lang)
+        speech_response = client.audio.speech.create(
+            model="tts-1",
+            voice="alloy",
+            input=st.session_state.result,
+            response_format="mp3",
+        )
         with NamedTemporaryFile(delete=False, suffix=".mp3") as tmpfile:
-            tts.save(tmpfile.name)
+            tmpfile.write(speech_response.read())
+            tmpfile.flush()
             st.audio(tmpfile.name, format="audio/mp3")
 
     # 📄 檔案下載
