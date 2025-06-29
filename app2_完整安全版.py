@@ -148,7 +148,7 @@ if st.button("⚡ 開始即時產生"):
             )
             result = response.choices[0].message.content
             st.session_state.result = result
-            st.rerun()
+            st.experimental_rerun()
 
 # ✅ 顯示結果與播放語音（不會因為按鈕被清除）
 if st.session_state.result:
