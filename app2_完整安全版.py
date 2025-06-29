@@ -131,7 +131,7 @@ def update_user_input():
     st.session_state.user_input = ""
 
 feature = st.selectbox("🎯 選擇功能", list(prompt_map.keys()), key="feature", on_change=update_user_input)
-model = st.selectbox("💡 選擇 GPT 模型", ["gpt-4o", "gpt-4", "gpt-3.5-turbo"])
+model = st.selectbox("💡 選擇 GPT 模型", ["gpt-4o", "gpt-4", "gpt-4.1-nano", "gpt-3.5-turbo"])
 user_input = st.text_area("✍️ 輸入內容（請描述你要做的事）", height=200, key="user_input")
 
 if st.button("⚡ 開始即時產生"):
